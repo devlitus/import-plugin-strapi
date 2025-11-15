@@ -10,6 +10,10 @@
       "Bash(npm run watch)",
       "Bash(npm run watch:link)",
       "Bash(npm run verify)",
+      "Bash(npm install *)",
+      "Bash(npm list *)",
+      "Bash(yalc *)",
+      "Bash(ls *)",
       "Bash(git diff:*)",
       "Bash(git status)",
       "Bash(git add)",
@@ -18,7 +22,8 @@
     "additionalDirectories": [
       "../docs/",
       "./admin/",
-      "./server/"
+      "./server/",
+      "./api/"
     ]
   }
 }

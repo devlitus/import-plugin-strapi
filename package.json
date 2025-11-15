@@ -33,24 +33,26 @@
   "dependencies": {
     "@strapi/design-system": "^2.0.0-rc.30",
     "@strapi/icons": "^2.0.0-rc.30",
+    "csv-parse": "^6.1.0",
+    "csv-stringify": "^6.6.0",
     "react-intl": "^7.1.14"
   },
   "devDependencies": {
-    "@strapi/strapi": "^5.31.0",
     "@strapi/sdk-plugin": "^5.3.2",
+    "@strapi/strapi": "^5.31.0",
+    "@strapi/typescript-utils": "^5.31.0",
+    "@types/react": "^19.2.5",
+    "@types/react-dom": "^19.2.3",
     "prettier": "^3.6.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.2",
     "styled-components": "^6.1.19",
-    "@types/react": "^19.2.5",
-    "@types/react-dom": "^19.2.3",
-    "@strapi/typescript-utils": "^5.31.0",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "@strapi/strapi": "^5.31.0",
     "@strapi/sdk-plugin": "^5.3.2",
+    "@strapi/strapi": "^5.31.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.30.2",

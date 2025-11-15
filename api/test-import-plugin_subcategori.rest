@@ -1,0 +1,18 @@
+# Import/Export Plugin REST API Tests
+@baseUrl=http://localhost:1337
+@contentTypeUid=api::subcategory.subcategory
+
+### 1. List all content types
+GET {{baseUrl}}/api/import-plugin/content-types
+
+### 2. Get schema for a specific content type
+GET {{baseUrl}}/api/import-plugin/schema/{{contentTypeUid}}
+
+### 3. Export data to CSV
+GET {{baseUrl}}/api/import-plugin/export/{{contentTypeUid}}
+
+### 4. Import data from CSV (multipart/form-data)
+POST {{baseUrl}}/api/import-plugin/import/{{contentTypeUid}}
+Content-Type: multipart/form-data
+
+file < ./sample-import.csv
