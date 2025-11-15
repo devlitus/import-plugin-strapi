@@ -71,7 +71,7 @@
     "displayName": "Import/Export",
     "description": "Powerful CSV import/export plugin for Strapi with drag-and-drop interface"
   },
-  "name": "strapi-plugin-import-export-devlitus",
+  "name": "strapi-import-tools",
   "description": "Powerful CSV import/export plugin for Strapi with modern UI, drag-and-drop support, and bulk data operations",
   "license": "MIT",
   "author": "devlitus <developercarles@gmail.com>",
