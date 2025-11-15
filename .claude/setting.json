@@ -1,0 +1,24 @@
+{
+  "env": {
+    "CLAUDE_CODE_ENABLE_TELEMETRY": "0"
+  },
+  "permissions": {
+    "allow": [
+      "Bash(npm run lint)",
+      "Bash(npm run test:*)",
+      "Bash(npm run build)",
+      "Bash(npm run watch)",
+      "Bash(npm run watch:link)",
+      "Bash(npm run verify)",
+      "Bash(git diff:*)",
+      "Bash(git status)",
+      "Bash(git add)",
+      "Bash(git commit)"
+    ],
+    "additionalDirectories": [
+      "../docs/",
+      "./admin/",
+      "./server/"
+    ]
+  }
+}
