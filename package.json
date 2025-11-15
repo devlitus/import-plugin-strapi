@@ -1,6 +1,13 @@
 {
-  "version": "0.0.0",
-  "keywords": [],
+  "version": "1.0.0",
+  "keywords": [
+    "strapi",
+    "plugin",
+    "import",
+    "export",
+    "csv",
+    "data-migration"
+  ],
   "type": "commonjs",
   "exports": {
     "./package.json": "./package.json",
@@ -61,11 +68,19 @@
   "strapi": {
     "kind": "plugin",
     "name": "import-plugin",
-    "displayName": "import/export",
-    "description": "data import"
+    "displayName": "Import/Export",
+    "description": "Powerful CSV import/export plugin for Strapi with drag-and-drop interface"
   },
-  "name": "import-plugin",
-  "description": "data import",
+  "name": "strapi-plugin-import-export",
+  "description": "Powerful CSV import/export plugin for Strapi with modern UI, drag-and-drop support, and bulk data operations",
   "license": "MIT",
-  "author": "devlitus <developercarles@gmail.com>"
+  "author": "devlitus <developercarles@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/devlitus/strapi-plugin-import-export.git"
+  },
+  "bugs": {
+    "url": "https://github.com/devlitus/strapi-plugin-import-export/issues"
+  },
+  "homepage": "https://github.com/devlitus/strapi-plugin-import-export#readme"
 }
