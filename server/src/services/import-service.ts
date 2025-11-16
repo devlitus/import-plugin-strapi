@@ -148,7 +148,7 @@ const processLocaleRecords = async (
     const chunkEnd = Math.min(chunkStart + CACHE_CHUNK_SIZE, records.length);
     const chunkRecords = records.slice(chunkStart, chunkEnd);
     const idsToCheck = chunkRecords
-      .map((r) => r.document_id)
+      .map((r) => r.document_id || r.documentId)
       .filter(Boolean) as string[];
 
     if (idsToCheck.length === 0) continue;
@@ -164,7 +164,11 @@ const processLocaleRecords = async (
       }
 
       const existing = await strapi.documents(uid as any).findMany(findOptions);
-      existing.forEach((doc: any) => existingIds.add(doc.documentId));
+      existing.forEach((doc: any) => {
+        existingIds.add(doc.documentId);
+        strapi.log.debug(`Found existing document: ${doc.documentId}`);
+      });
+      strapi.log.info(`Pre-fetched ${existing.length} existing IDs for locale: ${locale || 'default'}`);
     } catch (error) {
       strapi.log.warn('Error pre-fetching existing IDs:', error);
     }
@@ -175,10 +179,15 @@ const processLocaleRecords = async (
   const toUpdate: Array<{ index: number; record: any }> = [];
 
   records.forEach((record, index) => {
-    if (record.document_id && existingIds.has(record.document_id)) {
+    const recordId = record.document_id || record.documentId;
+    if (recordId && existingIds.has(recordId)) {
       toUpdate.push({ index, record });
+      strapi.log.debug(`Row ${index + 1}: Will UPDATE document ${recordId}`);
     } else {
       toCreate.push({ index, record });
+      if (recordId) {
+        strapi.log.debug(`Row ${index + 1}: Will CREATE document (ID: ${recordId})`);
+      }
     }
   });
 
@@ -215,10 +224,11 @@ const processBatch = async (
   for (const { index, record } of batch) {
     try {
       const dataToSave = buildDataToSave(schema, record);
+      const recordId = record.document_id || record.documentId;
 
       if (operation === 'update') {
         const updateOptions: any = {
-          documentId: record.document_id,
+          documentId: recordId,
           data: dataToSave,
         };
         if (locale) {
@@ -227,6 +237,7 @@ const processBatch = async (
 
         await strapi.documents(uid as any).update(updateOptions);
         results.updated++;
+        strapi.log.info(`✓ Updated row ${index + 1}: ${recordId}`);
       } else {
         const createOptions: any = { data: dataToSave };
         if (locale) {
@@ -235,6 +246,7 @@ const processBatch = async (
 
         await strapi.documents(uid as any).create(createOptions);
         results.created++;
+        strapi.log.info(`✓ Created row ${index + 1}`);
       }
     } catch (error: any) {
       const errorDetails = extractErrorDetails(error);
