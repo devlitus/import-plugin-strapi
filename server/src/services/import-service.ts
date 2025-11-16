@@ -147,11 +147,22 @@ const processLocaleRecords = async (
   for (let chunkStart = 0; chunkStart < records.length; chunkStart += CACHE_CHUNK_SIZE) {
     const chunkEnd = Math.min(chunkStart + CACHE_CHUNK_SIZE, records.length);
     const chunkRecords = records.slice(chunkStart, chunkEnd);
+
+    // DEBUG: Log what we're extracting
+    strapi.log.info(`[DEBUG] Processing chunk ${chunkStart}-${chunkEnd}, total records: ${chunkRecords.length}`);
+    strapi.log.info(`[DEBUG] First record keys: ${Object.keys(chunkRecords[0] || {}).join(', ')}`);
+    strapi.log.info(`[DEBUG] First record document_id value: "${chunkRecords[0]?.document_id}"`);
+
     const idsToCheck = chunkRecords
       .map((r) => r.document_id || r.documentId)
       .filter(Boolean) as string[];
 
-    if (idsToCheck.length === 0) continue;
+    strapi.log.info(`[DEBUG] idsToCheck array: [${idsToCheck.slice(0, 3).join(', ')}] (total: ${idsToCheck.length})`);
+
+    if (idsToCheck.length === 0) {
+      strapi.log.warn(`[DEBUG] No IDs found to check for locale: ${locale || 'default'}`);
+      continue;
+    }
 
     try {
       const findOptions: any = {
