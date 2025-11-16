@@ -4,7 +4,7 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
   async listContentTypes(ctx) {
     try {
       const contentTypes = await strapi
-        .plugin('import-plugin')
+        .plugin('strapi-import-tools')
         .service('contentTypeService')
         .listContentTypes();
 
@@ -25,7 +25,7 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
       }
 
       const schema = await strapi
-        .plugin('import-plugin')
+        .plugin('strapi-import-tools')
         .service('contentTypeService')
         .getSchema(uid);
 
@@ -47,7 +47,7 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
       }
 
       const { csv } = await strapi
-        .plugin('import-plugin')
+        .plugin('strapi-import-tools')
         .service('exportService')
         .exportData(uid);
 
@@ -88,15 +88,23 @@ const controller = ({ strapi }: { strapi: Core.Strapi }) => ({
       const csvContent = fs.readFileSync(filePath, 'utf-8');
 
       const result = await strapi
-        .plugin('import-plugin')
+        .plugin('strapi-import-tools')
         .service('importService')
         .importData(uid, csvContent);
 
       ctx.body = {
         data: result,
       };
-    } catch (error) {
-      ctx.throw(400, error);
+    } catch (error: any) {
+      strapi.log.error('Import error:', {
+        message: error.message,
+        status: error.status,
+        statusCode: error.statusCode,
+        stack: error.stack,
+        details: error.details,
+        body: error.body,
+      });
+      ctx.throw(400, error.message || JSON.stringify(error));
     }
   },
 });

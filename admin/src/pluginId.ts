@@ -1,1 +1,1 @@
-export const PLUGIN_ID = 'import-plugin';
+export const PLUGIN_ID = 'strapi-import-tools';

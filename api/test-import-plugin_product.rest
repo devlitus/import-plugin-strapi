@@ -3,16 +3,21 @@
 @contentTypeUid=api::product.product
 
 ### 1. List all content types
-GET {{baseUrl}}/api/import-plugin/content-types
+GET {{baseUrl}}/api/strapi-import-tools/content-types
 
 ### 2. Get schema for a specific content type
-GET {{baseUrl}}/api/import-plugin/schema/{{contentTypeUid}}
+GET {{baseUrl}}/api/strapi-import-tools/schema/{{contentTypeUid}}
 
 ### 3. Export data to CSV
-GET {{baseUrl}}/api/import-plugin/export/{{contentTypeUid}}
+GET {{baseUrl}}/api/strapi-import-tools/export/{{contentTypeUid}}
 
 ### 4. Import data from CSV (multipart/form-data)
-POST {{baseUrl}}/api/import-plugin/import/{{contentTypeUid}}
-Content-Type: multipart/form-data
+POST {{baseUrl}}/api/strapi-import-tools/import/{{contentTypeUid}}
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary
 
-file < ./sample-import.csv
+------WebKitFormBoundary
+Content-Disposition: form-data; name="file"; filename="products.csv"
+Content-Type: text/csv
+
+< ./test-data/products.csv
+------WebKitFormBoundary--

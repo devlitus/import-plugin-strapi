@@ -70,13 +70,174 @@ const validationService = ({ strapi }: { strapi: Core.Strapi }) => ({
     return errors;
   },
 
-  async validateData(rows: any[], schema: any) {
+  async validateRelationIds(row: any, schema: any, rowIndex: number) {
+    const errors: any[] = [];
+    const attributes = schema.attributes;
+
+    for (const fieldName of Object.keys(attributes)) {
+      const attribute = attributes[fieldName];
+
+      if (attribute.type !== 'relation') {
+        continue;
+      }
+
+      const idColumnName = `${fieldName}_document_id`;
+      const value = row[idColumnName];
+
+      if (!value || value === '') {
+        continue;
+      }
+
+      const targetUid = attribute.target;
+      if (!targetUid) {
+        continue;
+      }
+
+      const ids = String(value)
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => id);
+
+      for (const id of ids) {
+        try {
+          const exists = await strapi.documents(targetUid as any).findOne({
+            documentId: id,
+          });
+          if (!exists) {
+            errors.push({
+              row: rowIndex,
+              field: fieldName,
+              message: `Relation "${fieldName}" with document_id ${id} does not exist`,
+            });
+          }
+        } catch (error) {
+          errors.push({
+            row: rowIndex,
+            field: fieldName,
+            message: `Failed to validate relation "${fieldName}" with document_id ${id}`,
+          });
+        }
+      }
+    }
+
+    return errors;
+  },
+
+  async validateMediaIds(row: any, schema: any, rowIndex: number) {
+    const errors: any[] = [];
+    const attributes = schema.attributes;
+
+    for (const fieldName of Object.keys(attributes)) {
+      const attribute = attributes[fieldName];
+
+      if (attribute.type !== 'media') {
+        continue;
+      }
+
+      const idColumnName = `${fieldName}_id`;
+      const value = row[idColumnName];
+
+      if (!value || value === '') {
+        continue;
+      }
+
+      const ids = String(value)
+        .split(',')
+        .map((id) => id.trim())
+        .filter((id) => id);
+
+      for (const id of ids) {
+        try {
+          const exists = await strapi.db.query('plugin::upload.file').findOne({
+            where: { id: parseInt(id) },
+          });
+          if (!exists) {
+            errors.push({
+              row: rowIndex,
+              field: fieldName,
+              message: `Media file with ID ${id} does not exist`,
+            });
+          }
+        } catch (error) {
+          errors.push({
+            row: rowIndex,
+            field: fieldName,
+            message: `Failed to validate media file with ID ${id}`,
+          });
+        }
+      }
+    }
+
+    return errors;
+  },
+
+  async validateUniqueFields(row: any, schema: any, rowIndex: number, uid: string) {
+    const errors: any[] = [];
+    const attributes = schema.attributes;
+
+    for (const fieldName of Object.keys(attributes)) {
+      const attribute = attributes[fieldName];
+
+      if (!attribute.unique) {
+        continue;
+      }
+
+      const value = row[fieldName];
+      if (!value || value === '') {
+        continue;
+      }
+
+      try {
+        const query: any = {
+          [fieldName]: value,
+        };
+
+        if (row.document_id) {
+          query.documentId = { $ne: row.document_id };
+        }
+
+        const existing = await strapi.documents(uid as any).findOne(query);
+
+        if (existing) {
+          errors.push({
+            row: rowIndex,
+            field: fieldName,
+            message: `Field "${fieldName}" must be unique - value "${value}" already exists`,
+          });
+        }
+      } catch (error: any) {
+        errors.push({
+          row: rowIndex,
+          field: fieldName,
+          message: `Failed to validate unique constraint on field "${fieldName}": ${error.message}`,
+        });
+      }
+    }
+
+    return errors;
+  },
+
+  async validateData(rows: any[], schema: any, uid?: string) {
     const allErrors: any[] = [];
 
-    rows.forEach((row, index) => {
-      const rowErrors = this.validateRow(row, schema, index + 1);
-      allErrors.push(...rowErrors);
-    });
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const rowIndex = i + 1;
+
+      const basicErrors = this.validateRow(row, schema, rowIndex);
+      allErrors.push(...basicErrors);
+
+      const relationErrors = await this.validateRelationIds(row, schema, rowIndex);
+      allErrors.push(...relationErrors);
+
+      const mediaErrors = await this.validateMediaIds(row, schema, rowIndex);
+      allErrors.push(...mediaErrors);
+
+      if (uid) {
+        const uniqueErrors = await this.validateUniqueFields(row, schema, rowIndex, uid);
+        allErrors.push(...uniqueErrors);
+      }
+    }
 
     return {
       valid: allErrors.length === 0,
