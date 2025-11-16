@@ -86,12 +86,12 @@ Exports plugin object with hooks:
 
 ### Request Flow
 
-1. Admin UI → API endpoint
-2. Route handler in `server/src/routes/content-api.ts` → controller via `'controller.index'`
-3. Controller calls service: `strapi.plugin('import-plugin').service('serviceName')`
+1. Admin UI → API endpoint (`/api/strapi-import-tools/{endpoint}`)
+2. Route handler in `server/src/routes/content-api.ts` → controller
+3. Controller calls service: `strapi.plugin('strapi-import-tools').service('serviceName')`
 4. Service returns data; controller sets `ctx.body`
 
-**Critical**: Controllers/services receive `{ strapi }` injected. Access plugin-scoped services via `strapi.plugin('import-plugin').service('serviceName')`.
+**Critical**: Controllers/services receive `{ strapi }` injected. Access plugin-scoped services via `strapi.plugin('strapi-import-tools').service('serviceName')`. Always use `PLUGIN_ID` constant in frontend for API URLs.
 
 ## Key Conventions
 
@@ -114,11 +114,21 @@ Exports plugin object with hooks:
 - **Server**: Core types from `@strapi/strapi` (e.g., `Core.Strapi`)
 - **Both**: Extends Strapi's TypeScript utils for config inheritance
 
+### Admin Components
+
+Key reusable UI components in `admin/src/components/`:
+
+- **ContentTypeSelector**: Loads and displays available Strapi content types for selection
+- **FileUploader**: Drag-and-drop CSV file upload interface
+- **ImportResults**: Displays import results with JSON visualization, statistics, and detailed error information
+- **PluginIcon**: Plugin icon for menu registration
+
 ### Common Development Tasks
 
 - **Add API endpoint**: Define in `routes/content-api.ts`, create handler in `controllers/`, implement logic in `services/`
 - **Add UI component**: Place in `admin/src/components/`, import in pages
 - **Internationalization**: Add key-value pairs to `admin/src/translations/{locale}.json`, use `getTranslation()` helper
+- **API calls**: Always use `PLUGIN_ID` constant from `pluginId.ts` in frontend URLs: `/api/${PLUGIN_ID}/endpoint`
 
 ## Dependencies
 
@@ -132,21 +142,38 @@ Exports plugin object with hooks:
 
 ### Core
 
-- `@strapi/strapi` (v5.31.0): Strapi peer dependency
-- `@strapi/sdk-plugin` (v5.3.2): Plugin SDK peer dependency
+- `@strapi/strapi` (>=5.30.0): Strapi peer dependency (compatible with 5.30.0, 5.31.0+)
+- `@strapi/sdk-plugin` (>=5.3.2): Plugin SDK peer dependency
+- `csv-parse` (^6.1.0): CSV parsing library
+- `csv-stringify` (^6.6.0): CSV generation library
 
 ### Development
 
 - `typescript` (v5.9.3): Type checking
 - `prettier` (v3.6.2): Code formatting
-- `@strapi/typescript-utils` (v5.31.0): TypeScript config utils
+- `@strapi/typescript-utils` (>=5.30.0): TypeScript config utils
+
+### Backend Services
+
+Key services in `server/src/services/`:
+
+- **import-service**: Parses CSV content, validates records, and creates/updates Strapi documents. Uses `strapi.documents()` API for Strapi 5.x compatibility
+- **export-service**: Exports content as CSV, handling relations and media fields with proper field mapping
+- **validation-service**: Validates CSV data before import, checks unique constraints and required fields
+- **content-type-service**: Retrieves schema and available content types for the plugin UI
 
 ## Important Notes
 
-1. **PLUGIN_ID scoping**: Always use `PLUGIN_ID` constant for namespacing menu links, routes, and service lookups.
-2. **No tests found**: Only TypeScript validation (`test:ts:*` scripts) exists; no Jest suite in package.json.
-3. **Copilot instructions**: See `.github/copilot-instructions.md` for detailed architecture reference.
-4. **Package exports**: Dual exports configured in `package.json` under `exports` field; ensure both CommonJS and ESM variants work after build.
+1. **PLUGIN_ID scoping**: Always use `PLUGIN_ID` constant ('strapi-import-tools') for namespacing menu links, routes, and service lookups
+2. **Strapi 5.x API**: Use `strapi.documents(uid)` instead of deprecated `entityService`. Supports locale-specific operations
+3. **Error handling**: Import failures log detailed error information; continue processing on errors instead of stopping
+4. **No tests found**: Only TypeScript validation (`test:ts:*` scripts) exists; no Jest suite in package.json
+5. **Package exports**: Dual exports configured in `package.json` under `exports` field; ensure both CommonJS and ESM variants work after build
+6. **CSV Format**:
+   - First column should be `document_id` for update detection
+   - Include `locale` column for i18n content
+   - Relations: use `{fieldName}_document_id` format for IDs
+   - Media: use `{fieldName}_id` format for media file IDs
 
 ## Documentation
 
