@@ -3,6 +3,7 @@ import { Main, Box, Typography, Button } from '@strapi/design-system';
 import { Download } from '@strapi/icons';
 import { ContentTypeSelector } from '../components/ContentTypeSelector';
 import { getTranslation } from '../utils/getTranslation';
+import { PLUGIN_ID } from '../pluginId';
 
 export const ExportPage = () => {
   const [selectedContentType, setSelectedContentType] = useState<string>('');
@@ -16,7 +17,7 @@ export const ExportPage = () => {
     setIsExporting(true);
 
     try {
-      const response = await fetch(`/api/import-plugin/export/${selectedContentType}`);
+      const response = await fetch(`/api/${PLUGIN_ID}/export/${selectedContentType}`);
 
       if (!response.ok) {
         throw new Error('Export failed');

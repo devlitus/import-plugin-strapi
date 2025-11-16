@@ -4,6 +4,7 @@ import { Upload } from '@strapi/icons';
 import { ContentTypeSelector } from '../components/ContentTypeSelector';
 import { FileUploader } from '../components/FileUploader';
 import { ImportResults } from '../components/ImportResults';
+import { PLUGIN_ID } from '../pluginId';
 
 export const ImportPage = () => {
   const [selectedContentType, setSelectedContentType] = useState<string>('');
@@ -23,7 +24,7 @@ export const ImportPage = () => {
       const formData = new FormData();
       formData.append('file', selectedFile);
 
-      const response = await fetch(`/api/import-plugin/import/${selectedContentType}`, {
+      const response = await fetch(`/api/${PLUGIN_ID}/import/${selectedContentType}`, {
         method: 'POST',
         body: formData,
       });
